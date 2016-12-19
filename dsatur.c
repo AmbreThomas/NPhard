@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #define BUF_SIZE 4096
 #define ORDER_MAX 30
 
@@ -337,11 +338,139 @@ void	display_vecteur(int* vecteur, graphe g){
 	}
 }
 
+char *ft_strnew(size_t size)
+{
+	char *str;
+	size_t i;
+
+	if ((str = (char*)malloc(size + 1)) == NULL)
+		return (0);
+	i = 0;
+	while (i < size)
+		str[i++] = 0;
+	str[i] = 0;
+	return (str);
+}
+
+static size_t get_str_len(int n)
+{
+	size_t i;
+
+	i = 1;
+	while (n /= 10)
+		i++;
+	return (i);
+}
+
+char* ft_itoa(int n)
+{
+	char*str;
+	size_t str_len;
+	unsigned int n_cpy;
+
+	str_len = get_str_len(n);
+	n_cpy = n;
+	if (n < 0)
+	{
+		n_cpy = -n;
+		str_len++;
+	}
+	if (!(str = ft_strnew(str_len)))
+		return (0);
+	str[--str_len] = n_cpy % 10 + '0';
+	while (n_cpy /= 10)
+		str[--str_len] = n_cpy % 10 + '0';
+	if (n < 0)
+		*(str + 0) = '-';
+	return (str);
+}
+
+void	ecrire_fichier_sortie(int *coloration, graphe g)
+{
+	int i, k, max_boites, flag;
+	char *stock_itoa;
+	char **sortie_fichier;
+	char premier[] = "We use ";
+	char deuxieme[] = " petri dishes.\n";
+	FILE* sortie = NULL;
+
+	sortie = fopen("sortie", "w");
+	max_boites = int_max(coloration, g.order);
+	sortie_fichier = (char**)malloc(sizeof(char*) * (max_boites + 2));
+	stock_itoa = ft_itoa(max_boites);
+	sortie_fichier[0] = (char*)malloc(strlen("We use  petri dishes.\n") + strlen(stock_itoa) + 1);
+	sortie_fichier[0] = strcat(strcat(premier, stock_itoa), deuxieme);
+	i = 1;
+	while (i <= max_boites)
+	{
+		sortie_fichier[i] = (char*)malloc(nb_occurences_int(coloration, g.order, i) + 1);
+		i++;
+	}
+	sortie_fichier[i] = 0;
+	i = 1;
+	while (i <= max_boites)
+	{
+		k = 1;
+		flag = 0;
+		while (k <= g.order)
+		{
+			if (coloration[k] == i)
+			{
+				sortie_fichier[i][flag++] = k + 64;
+				sortie_fichier[i][flag++] = ',';
+			}
+			k++;
+		}
+		sortie_fichier[i][--flag] = '.';
+		sortie_fichier[i][++flag] = '\n';
+		sortie_fichier[i][++flag] = 0;
+		i++;
+	}
+	i = 0;
+	while (sortie_fichier[i] && sortie != NULL)
+	{
+		printf("%s", sortie_fichier[i]);
+		fputs(sortie_fichier[i++], sortie);
+	}
+	fclose(sortie);
+}
+
+int		int_max(int *tab, unsigned int taille)
+{
+	unsigned int i;
+	int max;
+
+	max = tab[1];
+	i = 1;
+	while (i <= taille)
+	{
+		if (tab[i] > max)
+			max = tab[i];
+		i++;
+	}
+	return (max);
+}
+
+int		nb_occurences_int(int *tab, int taille, int n)
+{
+	int i;
+	int j;
+
+	j = 1;
+	i = 0;
+	while (j <= taille)
+	{
+		if (tab[j++] == n)
+			i++;
+	}
+	return (i);
+}
+
 //=============================== MAIN =======================================
 
 int	main(int argc, const char* argv[]){
 
-	int i,k;
+	int i, k;
 	int * coloration;
 	graphe g;
 	char * input_file;
@@ -371,6 +500,7 @@ int	main(int argc, const char* argv[]){
 	}
 	*/
 
+	ecrire_fichier_sortie(coloration, g);
 	printf("\nfin.\n");
 	for ( k=0; k<ORDER_MAX; k++ )
 		free(g.adj_matrix[k]);
