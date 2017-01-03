@@ -1,8 +1,8 @@
 CC = gcc
 SRC = *.c
 OBJ = $(SRC:.c=.o)
-HEADERS = dsatur.h
-NAME = dsat
+HEADERS = graphe.h
+NAME = petriboxes
 
 .PHONY: all, clean, fclean, re
 

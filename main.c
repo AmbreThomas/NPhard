@@ -1,4 +1,4 @@
-#include "dsatur.h"
+#include "graphe.h"
 
 int	main(int argc, const char* argv[]){
 
@@ -9,7 +9,7 @@ int	main(int argc, const char* argv[]){
 
 	//========= construction du graphe: ===========
 	input_file = ouvrir_fichier("ENTREE");
-		if ((g.adj_matrix = (int**)malloc(sizeof(int*)*ORDER_MAX))==NULL)
+	if ((g.adj_matrix = (int**)malloc(sizeof(int*)*ORDER_MAX))==NULL)
 		return (0);
 	for ( k=0; k<ORDER_MAX; k++)
 		if ((g.adj_matrix[k] = (int*)malloc(sizeof(int)*ORDER_MAX))==NULL)
@@ -19,9 +19,18 @@ int	main(int argc, const char* argv[]){
 	//======= affichage ===========================
 	printf("%s",input_file);
 	display_graph(g);
+
+	//======= recherche brute =====================
+	printf("========== Recherche par bruteforce ===========\n");
+	bruteforce_search(g);
+
+
+	//====== Glouton ==============================
+	printf("========== Recherche approchée ===========\n");
 	coloration = glouton(g);
 	display_vecteur(coloration, g);
 
+	//====== DSATUR ===============================
 	/*
 	int verification_de_la_coloration;
 	dsatur(g);
@@ -32,6 +41,7 @@ int	main(int argc, const char* argv[]){
 	}
 	*/
 
+	//====== Sortie ===============================
 	ecrire_fichier_sortie(coloration, g);
 	printf("\nfin.\n");
 	for ( k=0; k<ORDER_MAX; k++ )

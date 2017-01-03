@@ -1,4 +1,33 @@
-#include "dsatur.h"
+#include "graphe.h"
+
+int		int_max(int *tab, unsigned int taille){
+	unsigned int i;
+	int max;
+
+	max = tab[1];
+	i = 1;
+	while (i <= taille)
+	{
+		if (tab[i] > max)
+			max = tab[i];
+		i++;
+	}
+	return (max);
+}
+
+int		nb_occurences_int(int *tab, int taille, int n){
+	int i;
+	int j;
+
+	j = 1;
+	i = 0;
+	while (j <= taille)
+	{
+		if (tab[j++] == n)
+			i++;
+	}
+	return (i);
+}
 
 int		taille_fichier(char *fichier){
 	char buf[BUF_SIZE];
@@ -35,8 +64,7 @@ char*	ouvrir_fichier(char* fichier){
 	return (buf);
 }
 
-void	ecrire_fichier_sortie(int *coloration, graphe g)
-{
+void	ecrire_fichier_sortie(int *coloration, graphe g){
 	int i, k, max_boites, flag;
 	char *stock_itoa;
 	char **sortie_fichier;

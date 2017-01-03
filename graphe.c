@@ -1,4 +1,39 @@
-#include "dsatur.h"
+#include "graphe.h"
+
+//================================ UTILITAIRES ===========================
+
+//~ int		verif_color(graphe g){
+	//~ int i,j;
+	//~ for ( i=1; i<=g.order; i++ ){
+		//~ for ( j=1; j<=g.order; j++ ){
+			//~ if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
+				//~ printf("\nErreur: le sommet %d voisin de %d est colorié avec la même couleur %d", i, j, coloration_trouvee[i]);
+				//~ return (0);
+			//~ }
+		//~ }
+	//~ }
+	//~ return (1);
+//~ }
+
+void	display_graph(graphe g){
+	int i,j;
+	printf("\n\nDISPLAY graph:\n");
+	for ( i=1; i<=g.order; i++){
+		printf("\n");
+		for ( j=1; j<=g.order; j++ ){
+			printf(" %d", g.adj_matrix[i][j]);
+		}
+	}
+	printf("\n");
+}
+
+void	display_vecteur(int* vecteur, graphe g){
+	int i;
+	printf("\n\nDISPLAY couleurs (sommet: couleur):\n");
+	for ( i=1; i<=g.order; i++ ){
+		printf(" %d: %d\n", i, vecteur[i]);
+	}
+}
 
 graphe	init(graphe g){
 	int i,j;
@@ -100,6 +135,122 @@ void	breadth_search(graphe g, unsigned int s){
 		}
 	}
 }
+
+//================= ALGORITHME EXACT ==========================
+
+int		remove_from_matrix(int** adj_matrix, int* clique, int from, int to, graphe g){
+	int**	old_g_adj;
+	int		i,j,k,to_keep;
+	
+	if ((old_g_adj = (int**)malloc(sizeof(int*)*from))==0)
+		return (0);
+	for ( k=0; k<from; k++)
+		if ((old_g_adj[k] = (int*)malloc(sizeof(int)*from))==0)
+			return (0);
+
+	//retirer les lignes
+	for ( j=0; j<from; j++ ){
+		for ( k=0; k<from; k++ ){
+			old_g_adj[j][k] = adj_matrix[j][k];
+		}
+	}
+	k = -1;
+	for ( i=0; i<from; i++ ){
+		to_keep = 1;
+		for ( j=0; j<from; j++ )
+			if ( clique[j] == i+1 )
+				to_keep = 0;
+		if ( to_keep == 1){
+			k++;
+			for ( j=0; j<from; j++ )
+				adj_matrix[k][j] = old_g_adj[i][j];
+		}
+	}
+	//retirer les colonnes
+	for ( j=0; j<from; j++ ){
+		for ( k=0; k<from; k++ ){
+			old_g_adj[j][k] = adj_matrix[j][k];
+		}
+	}
+	k=-1;
+	for ( i=0; i<from; i++ ){
+		to_keep = 1;
+		for ( j=0; j<from; j++ )
+			if ( clique[j] == i+1 )
+				to_keep = 0;
+		if ( to_keep == 1){
+			k++;
+			for ( j=0; j<from; j++ )
+				adj_matrix[j][k] = old_g_adj[j][i];
+		}
+	}
+
+	for ( k=0; k<from; k++ )
+		free(old_g_adj[k]);
+	free(old_g_adj);
+}
+
+int*	 max_clique(graphe g, int* clique, int* voisinnage, int* sondable){
+	
+}
+
+void	bruteforce_search(graphe g){
+	int n = g.order;
+	int couleurs = 0;
+	int h,i,j,k,l;
+	int coloration[n];
+	int max_clique[n];  // peut contenir au max n noeuds
+	int len_max_clique; // toujours <= n
+
+	// init
+	for ( i=0; i<n; i++){
+		coloration[i] = 0;
+		max_clique[i] = 0;
+	}
+
+	//boucle principale
+	while (n>0){
+		//=== recommencer la recherche de la plus grande clique ===
+		printf("\n Encore %d noeuds à colorier.\n",n);
+		len_max_clique = 0;
+		
+		k = n;
+		while ( k > 0 && len_max_clique == 0){
+			printf("==>Recherche d'une clique de taille %d...",k);
+			//chercher si une clique de taille k existe
+			i = 0;
+			for ( j=0; j<g.order; j++ ){
+				l = 0;
+				for ( h=0; h<g.order; h++ )
+					l += g.adj_matrix[j][h]; // l ==> degré de j
+				if ( l >= k-1 )
+					i++;
+			}
+			if ( i>=k ){ //il existe k noeuds de degré >= (k-1)
+				//chercher une clique de taille k
+				
+				
+			}
+			k--;
+		}
+
+		
+
+		//=== colorier la clique trouvée ===
+		couleurs++;
+		for ( i=0; i<len_max_clique; i++ )
+			coloration[max_clique[i]] = couleurs;
+
+		//=== soustraire la clique trouvée au graphe g ===
+
+		n -= len_max_clique;
+		printf(" J'en retire %d, on aura n=%d.\n",k,n);
+		remove_from_matrix(g.adj_matrix, max_clique, g.order, n, g	);
+		g.order = n;
+	}
+	display_graph(g);
+}
+
 
 //================= ALGORITHME GLOUTON ==========================
 
@@ -251,40 +402,5 @@ void	dsatur(graphe g){
 		coloration_trouvee[s] = coloration_avec_couleur_minimum(s,g);
 		printf("\n s=%d coloré par %d", s, coloration_trouvee[s]);
 		maj_du_vecteur_dsat(s,g);
-	}
-}
-
-//================================ UTILITAIRES ===========================
-
-int		verif_color(graphe g){
-	int i,j;
-	for ( i=1; i<=g.order; i++ ){
-		for ( j=1; j<=g.order; j++ ){
-			if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
-				printf("\nErreur: le sommet %d voisin de %d est colorié avec la même couleur %d", i, j, coloration_trouvee[i]);
-				return (0);
-			}
-		}
-	}
-	return (1);
-}
-
-void	display_graph(graphe g){
-	int i,j;
-	printf("\n\nDISPLAY graph:\n");
-	for ( i=1; i<=g.order; i++){
-		printf("\n");
-		for ( j=1; j<=g.order; j++ ){
-			printf(" %d", g.adj_matrix[i][j]);
-		}
-	}
-	printf("\n");
-}
-
-void	display_vecteur(int* vecteur, graphe g){
-	int i;
-	printf("\n\nDISPLAY couleurs (sommet: couleur):\n");
-	for ( i=1; i<=g.order; i++ ){
-		printf(" %d: %d\n", i, vecteur[i]);
 	}
 }
