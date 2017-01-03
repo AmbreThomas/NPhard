@@ -1,7 +1,6 @@
 #include "graphe.h"
 
-char *ft_strnew(size_t size)
-{
+char	*ft_strnew(size_t size){
 	char *str;
 	size_t i;
 
@@ -14,8 +13,7 @@ char *ft_strnew(size_t size)
 	return (str);
 }
 
-size_t get_str_len(int n)
-{
+size_t	get_str_len(int n){
 	size_t i;
 
 	i = 1;
@@ -24,8 +22,7 @@ size_t get_str_len(int n)
 	return (i);
 }
 
-char* ft_itoa(int n)
-{
+char*	ft_itoa(int n){
 	char*str;
 	size_t str_len;
 	unsigned int n_cpy;
@@ -45,4 +42,16 @@ char* ft_itoa(int n)
 	if (n < 0)
 		*(str + 0) = '-';
 	return (str);
+}
+
+int		combinaisons(int n, int k)
+{
+	double C[k+1];
+	int i;
+
+	C[0] = 1;
+	i = -1;
+	while (++i < n)
+		C[i + 1] = (C[i] * (n - i)) / (i + 1);
+	return (int)(C[k]);
 }

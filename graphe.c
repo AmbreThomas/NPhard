@@ -194,42 +194,109 @@ int*	 max_clique(graphe g, int* clique, int* voisinnage, int* sondable){
 	
 }
 
+int		is_clique(graphe g, int* max_clique, int k, int* combin){
+	int i,j;
+
+	for( i=0; i<k; i++ ){
+		for ( j=0; j<k; j++ ){
+			if (combin[i]==j) break;
+			if (g.adj_matrix[max_clique[combin[i]]][max_clique[combin[j]]]==0) return(0);
+		}
+	}
+	printf("Clique de taille %d trouvée !\n",k);
+	return (1);
+}
+
 void	bruteforce_search(graphe g){
 	int n = g.order;
 	int couleurs = 0;
-	int h,i,j,k,l;
+	int h;
+	int i;
+	int j;
+	int k;
+	int l;
 	int coloration[n];
 	int max_clique[n];  // peut contenir au max n noeuds
 	int len_max_clique; // toujours <= n
+	int degree[n];
 
 	// init
 	for ( i=0; i<n; i++){
 		coloration[i] = 0;
-		max_clique[i] = 0;
+		k = 0;
+		for ( j=0; j<n; j++ ){
+			k += g.adj_matrix[i][j];
+		}
+		degree[i] = k;
 	}
 
 	//boucle principale
-	while (n>0){
-		//=== recommencer la recherche de la plus grande clique ===
-		printf("\n Encore %d noeuds à colorier.\n",n);
+	while (n>0)
+	{
+		//=== recherche de la plus grande clique ===
+		printf("Encore %d noeuds a colorier.\n",n);
 		len_max_clique = 0;
-		
 		k = n;
-		while ( k > 0 && len_max_clique == 0){
+		while ( k>0 && len_max_clique == 0 )
+		{
 			printf("==>Recherche d'une clique de taille %d...",k);
 			//chercher si une clique de taille k existe
-			i = 0;
-			for ( j=0; j<g.order; j++ ){
-				l = 0;
-				for ( h=0; h<g.order; h++ )
-					l += g.adj_matrix[j][h]; // l ==> degré de j
-				if ( l >= k-1 )
-					i++;
+			l = 0;
+			for ( i=0; i<n; i++ ){
+				if ( degree[i] >= k-1 ){
+					max_clique[l] = i;
+					l++;
+				}
 			}
-			if ( i>=k ){ //il existe k noeuds de degré >= (k-1)
-				//chercher une clique de taille k
-				
-				
+			//On a l noeuds de degré >=(k-1), rangés dans max_clique
+			if ( l>=k ){ //si moins de k: pas de clique possible
+				//chercher les combinaisons de k noeuds parmi ces l
+				int** combin;
+				int n_combin = combinaisons(l, k);
+				if ((combin = (int**)malloc(sizeof(int*)*n_combin))==0)
+					return;
+				for ( i=0; i<n_combin; i++)
+					if ((combin[i] = (int*)malloc(sizeof(int)*k))==0)
+						return;
+
+
+				for ( j=0; j<k; j++ )
+					combin[0][j] = j; // la première combinaison est 0,1,2,...,k-1
+				j = 0;
+				while (combin[j][0] <= (l - k)) // dernière combinaison possible
+				{
+					j++;
+					i = 0;
+					while (i < k) // recopie la précédente combinaison
+						combin[j][i] = combin[j-1][i++];
+
+					combin[j][k - 1]++; //incrémente la dernière case
+					i = k;
+					while (i) // si une case a dépassé l, on passe à la case précédente
+					{
+						i--;
+						if (combin[j][i] > l - 1)
+						{
+							if (i) combin[j][i - 1]++;
+							combin[j][i] = 0;
+						}
+					}
+				}
+
+
+				//pour chaque combinaison, vérifier si c'est une clique:
+				for ( i=0; i<n_combin; i++ ){
+					if (is_clique(g, max_clique, k, combin[i])){
+						//si oui, récupérer les numéros des noeuds concernés
+						for ( j=0; j<k; j++ )
+							max_clique[j] = max_clique[combin[i][j]];
+						len_max_clique = k;
+						break;
+					}
+				}
+				for ( i=0; i<n_combin; i++ )
+					free(combin[i]);
+				free(combin);
 			}
 			k--;
 		}
