@@ -30,7 +30,7 @@ void	display_graph(graphe g){
 void	display_vecteur(int* vecteur, graphe g){
 	int i;
 	printf("\n\nDISPLAY couleurs (sommet: couleur):\n");
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		printf(" %d: %d\n", i, vecteur[i]);
 	}
 }
@@ -74,7 +74,7 @@ graphe	graph_from_file(graphe g, const char *input_file){
 
 //================= ALGORITHME EXACT ==========================
 
-void		remove_from_matrix(int** adj_matrix, int* clique, int from){
+void	remove_from_matrix(int** adj_matrix, int* clique, int from){
 	int**	old_g_adj;
 	int		i,j,k,to_keep;
 	
@@ -126,7 +126,6 @@ void		remove_from_matrix(int** adj_matrix, int* clique, int from){
 	free(old_g_adj);
 }
 
-
 int		is_clique(graphe g, int* max_clique, int k, int* combin){
 	int i,j;
 
@@ -141,39 +140,39 @@ int		is_clique(graphe g, int* max_clique, int k, int* combin){
 }
 
 int*	bruteforce_search(graphe g){
-	printf("...");
 	int n = g.order;
 	int couleurs = 0;
-	int i,j,k,l;
+	int i,j,k,l,n_combin;
 	int* coloration;
+	int** combin;
 	int max_clique[n];  // peut contenir au max n noeuds
-	int len_max_clique; // toujours <= n
+	int len_max_c; // toujours <= n
 	int degree[n];
 
 	// init
 	if ((coloration = (int*)malloc(sizeof(int) * n)) == NULL)
 		return (0);
-	printf("...");
-	for ( i=0; i<n; i++){
-		coloration[i] = 0;
-		k = 0;
-		for ( j=0; j<n; j++ ){
-			k += g.adj_matrix[i][j];
-		}
-		degree[i] = k;
-	}
+	for ( i=0; i<n; i++)
+		coloration[i++] = 0;
 
 	//boucle principale
-	printf("hehe c nul");
 	while (n>0)
 	{
+		for (i=0; i<n; i++ ){
+			k = 0;
+			for ( j=0; j<n; j++ )
+				k += g.adj_matrix[i][j];
+			degree[i] = k;
+		}
+		printf("\nEncore %d noeuds à colorier.\nDegrés:\n",n);
+		for ( i=0; i<n; i++ )
+			printf("%d ",degree[i]);
+		printf("\nAllons y.\n");
+		
 		//=== recherche de la plus grande clique ===
-	printf("...");
-		len_max_clique = 0;
-	printf("...");
+		len_max_c = 0;
 		k = n;
-	printf("...");
-		while ( k>0 && len_max_clique == 0 )
+		while ( k>0 && len_max_c == 0 )
 		{
 			printf("==>Recherche d'une clique de taille %d...",k);
 			//chercher si une clique de taille k existe
@@ -188,8 +187,7 @@ int*	bruteforce_search(graphe g){
 			//s'il y en a moins de k: pas de k-clique possible
 			if ( l>=k ){
 				//chercher les combinaisons de k noeuds parmi ces l
-				int** combin;
-				int n_combin = combinaisons(l, k);
+				n_combin = combinaisons(l, k);
 				if ((combin = (int**)malloc(sizeof(int*)*n_combin))==0)
 					return (0);
 				for ( i=0; i<n_combin; i++)
@@ -224,7 +222,7 @@ int*	bruteforce_search(graphe g){
 						//si oui, récupérer les numéros des noeuds concernés
 						for ( j=0; j<k; j++ )
 							max_clique[j] = max_clique[combin[i][j]];
-						len_max_clique = k;
+						len_max_c = k;
 						break;
 					}
 				}
@@ -236,11 +234,11 @@ int*	bruteforce_search(graphe g){
 		}
 		//=== colorier la clique trouvée ===
 		couleurs++;
-		for ( i=0; i<len_max_clique; i++ ){
+		for ( i=0; i<len_max_c; i++ ){
 			coloration[max_clique[i]] = couleurs;
 		}
 		//=== soustraire la clique trouvée au graphe g ===
-		n -= len_max_clique;
+		n -= len_max_c;
 		printf(" J'en retire %d, on aura n=%d.\n",k,n);
 		remove_from_matrix(g.adj_matrix, max_clique, g.order);
 		g.order = n;
