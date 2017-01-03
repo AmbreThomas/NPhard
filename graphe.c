@@ -35,7 +35,7 @@ void	display_graph(graphe g){
 
 void	display_vecteur(int* vecteur, graphe g){
 	int i;
-	printstr("\n\nDISPLAY couleurs (sommet: couleur):\n");
+	printstr("\n\ncouleurs (sommet: couleur):\n");
 	for ( i=0; i<g.order; i++ ){
 		printstr(" ");
 		printnbr(i);
@@ -85,7 +85,11 @@ graphe	graph_from_file(graphe g, const char *input_file){
 	return (g);
 }
 
-//================= ALGORITHME EXACT ==========================
+//================= ALGORITHME ZYKOV ==============================
+
+
+
+//================= ALGORITHME MAX_CLIQUE ==========================
 
 void	remove_from_matrix(int** adj_matrix, int* clique, int len_max_c, int from){
 	int**	old_g_adj;

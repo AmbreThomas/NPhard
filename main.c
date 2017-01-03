@@ -35,8 +35,8 @@ int	main(void){
 	//~ }
 
 	//======= recherche brute =====================
-	printstr("========== Recherche par bruteforce ===========\n");
-	coloration = bruteforce_search(g);
+	printstr("========== Algorithme de Zykov ===========\n");
+
 	display_vecteur(coloration, g);
 
 
