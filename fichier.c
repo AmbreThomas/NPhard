@@ -85,7 +85,7 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 		i++;
 	}
 	sortie_fichier[i] = 0;
-	i = 0;
+	i = 1;
 	while (i <= max_boites)
 	{
 		k = 0;
@@ -107,7 +107,7 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 	i = 0;
 	while (sortie_fichier[i] && sortie != NULL)
 	{
-		printf("%s", sortie_fichier[i]);
+		printstr(sortie_fichier[i]);
 		fputs(sortie_fichier[i++], sortie);
 	}
 	fclose(sortie);
