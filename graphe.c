@@ -18,9 +18,9 @@
 void	display_graph(graphe g){
 	int i,j;
 	printf("\n\nDISPLAY graph:\n");
-	for ( i=1; i<=g.order; i++){
+	for ( i=0; i<g.order; i++){
 		printf("\n");
-		for ( j=1; j<=g.order; j++ ){
+		for ( j=0; j<g.order; j++ ){
 			printf(" %d", g.adj_matrix[i][j]);
 		}
 	}
@@ -33,16 +33,6 @@ void	display_vecteur(int* vecteur, graphe g){
 	for ( i=1; i<=g.order; i++ ){
 		printf(" %d: %d\n", i, vecteur[i]);
 	}
-}
-
-graphe	init(graphe g){
-	int i,j;
-	for ( i=1; i<=g.order; i++ ){
-		for ( j=1; j<=g.order; j++ ){
-			g.adj_matrix[i][j] = 0;
-		}
-	}
-	return (g);
 }
 
 graphe	graph_from_file(graphe g, const char *input_file){
@@ -59,8 +49,8 @@ graphe	graph_from_file(graphe g, const char *input_file){
 		i++;
 	printf("\n%d espèces à cultiver.\n", order);
 	g.order = order;
-	for ( j=1; j<=order; j++ ){
-		for ( k=1; k<=order; k++ ){
+	for ( j=0; j<order; j++ ){
+		for ( k=0; k<order; k++ ){
 			g.adj_matrix[j][k] = 0;
 		}
 	}
@@ -70,8 +60,8 @@ graphe	graph_from_file(graphe g, const char *input_file){
 		k = 0;
 		while ((input_file[i] != '\n') && (input_file[i] !='.')){
 			if ((input_file[i] != ',') && (input_file[i] != ' ')){
-				if (j==0){ j = input_file[i] - 64; }
-				else {k = input_file[i] - 64; }
+				if (j==0){ j = input_file[i] - 65; }
+				else {k = input_file[i] - 65; }
 			}
 			i++;
 		}
@@ -210,11 +200,7 @@ int		is_clique(graphe g, int* max_clique, int k, int* combin){
 void	bruteforce_search(graphe g){
 	int n = g.order;
 	int couleurs = 0;
-	int h;
-	int i;
-	int j;
-	int k;
-	int l;
+	int h,i,j,k,l;
 	int coloration[n];
 	int max_clique[n];  // peut contenir au max n noeuds
 	int len_max_clique; // toujours <= n
@@ -229,6 +215,10 @@ void	bruteforce_search(graphe g){
 		}
 		degree[i] = k;
 	}
+	printf("\nDegrés des noeuds:\n");
+	for ( i=0; i<n; i++ )
+		printf("%d ",degree[i]);
+	printf("\n");
 
 	//boucle principale
 	while (n>0)
@@ -249,7 +239,8 @@ void	bruteforce_search(graphe g){
 				}
 			}
 			//On a l noeuds de degré >=(k-1), rangés dans max_clique
-			if ( l>=k ){ //si moins de k: pas de clique possible
+			//s'il y en a moins de k: pas de k-clique possible
+			if ( l>=k ){
 				//chercher les combinaisons de k noeuds parmi ces l
 				int** combin;
 				int n_combin = combinaisons(l, k);
@@ -258,8 +249,6 @@ void	bruteforce_search(graphe g){
 				for ( i=0; i<n_combin; i++)
 					if ((combin[i] = (int*)malloc(sizeof(int)*k))==0)
 						return;
-
-
 				for ( j=0; j<k; j++ )
 					combin[0][j] = j; // la première combinaison est 0,1,2,...,k-1
 				j = 0;
@@ -282,8 +271,6 @@ void	bruteforce_search(graphe g){
 						}
 					}
 				}
-
-
 				//pour chaque combinaison, vérifier si c'est une clique:
 				for ( i=0; i<n_combin; i++ ){
 					if (is_clique(g, max_clique, k, combin[i])){
