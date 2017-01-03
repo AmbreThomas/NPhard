@@ -1,5 +1,6 @@
 CC = gcc
 SRC = *.c
+FLAG = -Werror -Wextra -Wall
 OBJ = $(SRC:.c=.o)
 HEADERS = graphe.h
 NAME = petriboxes
@@ -9,15 +10,15 @@ NAME = petriboxes
 all : $(NAME)
 
 $(NAME) : $(OBJ)
-	@$(CC) -o $(NAME) $(SRC)
+	$(CC) -o $(NAME) $(OBJ)
 
 $(OBJ) : $(SRC) $(HEADERS)
-	@$(CC) -c $(SRC)
+	$(CC) -c $(SRC) $(FLAG)
 
 clean :
-	@/bin/rm -f $(OBJ)
+	/bin/rm -f $(OBJ)
 
 fclean : clean
-	@/bin/rm -f $(NAME)
+	/bin/rm -f $(NAME)
 
 re : fclean all

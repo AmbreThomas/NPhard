@@ -72,71 +72,17 @@ graphe	graph_from_file(graphe g, const char *input_file){
 	return (g);
 }
 
-void	dfs_rec(graphe g, unsigned int s, int* marque){
-	unsigned int i;
-	marque[s] = 1;
-	for ( i=1; i<=g.order; i++ ){
-		if ( g.adj_matrix[s][i]==1)
-			if ( !marque[i] ){
-				printf("\tRencontre préfixe de %d\n", i);
-				dfs_rec(g, i, marque);
-				printf("\tRencontre suffixe de %d\n", i);
-			}
-	}
-}
-
-void	depth_search(graphe g, unsigned int start_som){
-	int* marque,i;
-	marque = malloc(sizeof(int)*(g.order));
-	for ( i=1; i<=g.order; i++ )
-		marque[i] = 0;
-	printf("\n\nDFS à partir du sommet %d\n",start_som);
-	dfs_rec(g, start_som, marque);
-	printf("\tRencontre suffixe de %d\n",start_som);
-	free(marque);
-	printf("\n");
-}
-
-void	breadth_search(graphe g, unsigned int s){
-	int* list; //la pile fifo
-	int* marque; //mémoriser les sommets déjà visités
-	int i,deb,fin;
-	int sommet_a_parcourir;
-	list = (int *)malloc(sizeof(int)*(g.order + 2));
-	marque = (int *)malloc(sizeof(int)*(g.order + 2 ));
-	for ( i=1; i<=g.order; i++ )
-		marque[i] = 0;
-	//on empile le sommet de départ:
-	deb = 1;
-	fin = 2;
-	list[deb] = s;
-	marque[s] = 1; // déjà visité
-	while (deb <= g.order ){
-		sommet_a_parcourir = list[deb];
-		deb++;
-		printf("\n sommet %d", sommet_a_parcourir);
-		//empiler les voisins du sommet à parcourir:
-		for ( i=1; i<=g.order; i++ ){
-			if ( g.adj_matrix[sommet_a_parcourir][i] && (marque[i]==0)){  //si voisin non marqué
-				list[fin] = i;
-				marque[i] = 1;
-				fin++;
-			}
-		}
-	}
-}
-
 //================= ALGORITHME EXACT ==========================
 
-int		remove_from_matrix(int** adj_matrix, int* clique, int from, int to, graphe g){
+void		remove_from_matrix(int** adj_matrix, int* clique, int from){
 	int**	old_g_adj;
 	int		i,j,k,to_keep;
 	
 	if ((old_g_adj = (int**)malloc(sizeof(int*)*from))==0)
-		return (0);
+		return ;
 	for ( k=0; k<from; k++)
 		if ((old_g_adj[k] = (int*)malloc(sizeof(int)*from))==0)
-			return (0);
+			return ;
 
 	//retirer les lignes
 	for ( j=0; j<from; j++ ){
@@ -180,9 +126,6 @@ int		remove_from_matrix(int** adj_matrix, int* clique, int from, int to, graphe 
 	free(old_g_adj);
 }
 
-int*	 max_clique(graphe g, int* clique, int* voisinnage, int* sondable){
-	
-}
 
 int		is_clique(graphe g, int* max_clique, int k, int* combin){
 	int i,j;
@@ -197,16 +140,20 @@ int		is_clique(graphe g, int* max_clique, int k, int* combin){
 	return (1);
 }
 
-void	bruteforce_search(graphe g){
+int*	bruteforce_search(graphe g){
+	printf("...");
 	int n = g.order;
 	int couleurs = 0;
-	int h,i,j,k,l;
-	int coloration[n];
+	int i,j,k,l;
+	int* coloration;
 	int max_clique[n];  // peut contenir au max n noeuds
 	int len_max_clique; // toujours <= n
 	int degree[n];
 
 	// init
+	if ((coloration = (int*)malloc(sizeof(int) * n)) == NULL)
+		return (0);
+	printf("...");
 	for ( i=0; i<n; i++){
 		coloration[i] = 0;
 		k = 0;
@@ -215,18 +162,17 @@ void	bruteforce_search(graphe g){
 		}
 		degree[i] = k;
 	}
-	printf("\nDegrés des noeuds:\n");
-	for ( i=0; i<n; i++ )
-		printf("%d ",degree[i]);
-	printf("\n");
 
 	//boucle principale
+	printf("hehe c nul");
 	while (n>0)
 	{
 		//=== recherche de la plus grande clique ===
-		printf("Encore %d noeuds a colorier.\n",n);
+	printf("...");
 		len_max_clique = 0;
+	printf("...");
 		k = n;
+	printf("...");
 		while ( k>0 && len_max_clique == 0 )
 		{
 			printf("==>Recherche d'une clique de taille %d...",k);
@@ -245,10 +191,10 @@ void	bruteforce_search(graphe g){
 				int** combin;
 				int n_combin = combinaisons(l, k);
 				if ((combin = (int**)malloc(sizeof(int*)*n_combin))==0)
-					return;
+					return (0);
 				for ( i=0; i<n_combin; i++)
 					if ((combin[i] = (int*)malloc(sizeof(int)*k))==0)
-						return;
+						return (0 );
 				for ( j=0; j<k; j++ )
 					combin[0][j] = j; // la première combinaison est 0,1,2,...,k-1
 				j = 0;
@@ -256,9 +202,10 @@ void	bruteforce_search(graphe g){
 				{
 					j++;
 					i = 0;
-					while (i < k) // recopie la précédente combinaison
-						combin[j][i] = combin[j-1][i++];
-
+					while (i < k) {// recopie la précédente combinaison
+						combin[j][i] = combin[j-1][i];
+						i++;
+					}
 					combin[j][k - 1]++; //incrémente la dernière case
 					i = k;
 					while (i) // si une case a dépassé l, on passe à la case précédente
@@ -287,27 +234,24 @@ void	bruteforce_search(graphe g){
 			}
 			k--;
 		}
-
-		
-
 		//=== colorier la clique trouvée ===
 		couleurs++;
-		for ( i=0; i<len_max_clique; i++ )
+		for ( i=0; i<len_max_clique; i++ ){
 			coloration[max_clique[i]] = couleurs;
-
+		}
 		//=== soustraire la clique trouvée au graphe g ===
-
 		n -= len_max_clique;
 		printf(" J'en retire %d, on aura n=%d.\n",k,n);
-		remove_from_matrix(g.adj_matrix, max_clique, g.order, n, g	);
+		remove_from_matrix(g.adj_matrix, max_clique, g.order);
 		g.order = n;
 	}
 	display_graph(g);
+	return (coloration);
 }
 
 
 //================= ALGORITHME GLOUTON ==========================
-
+/*
 int*	copyYdansZ(int* destination, int* origine, graphe g){
 	int i;
 	for ( i=1; i<=g.order; i++ )
@@ -458,3 +402,4 @@ void	dsatur(graphe g){
 		maj_du_vecteur_dsat(s,g);
 	}
 }
+*/

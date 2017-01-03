@@ -31,4 +31,7 @@ int		*retirer_s_et_ses_voisins(int s, int *vecteur, graphe g);
 int		*glouton(graphe g);
 void	init_dsat(graphe g);
 int		sommet_non_colorie_de_dsat_max(graphe g);
-
+int*	bruteforce_search(graphe g);
+int		combinaisons(int n, int k);
+void	display_graph(graphe g);
+void	display_vecteur(int *vecteur, graphe g);

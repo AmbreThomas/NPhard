@@ -1,8 +1,8 @@
 #include "graphe.h"
 
-int	main(int argc, const char* argv[]){
+int	main(void){
 
-	int i, k;
+	int k;
 	int * coloration;
 	graphe g;
 	char * input_file;
@@ -22,16 +22,15 @@ int	main(int argc, const char* argv[]){
 
 	//======= recherche brute =====================
 	printf("========== Recherche par bruteforce ===========\n");
-	bruteforce_search(g);
+	coloration = bruteforce_search(g);
 
-
+/*
 	//====== Glouton ==============================
 	printf("========== Recherche approchée ===========\n");
 	coloration = glouton(g);
 	display_vecteur(coloration, g);
 
 	//====== DSATUR ===============================
-	/*
 	int verification_de_la_coloration;
 	dsatur(g);
 	if (verif_color(g)==1){
@@ -39,13 +38,13 @@ int	main(int argc, const char* argv[]){
 	} else {
 		printf("\n Erreur dans la coloration.");
 	}
-	*/
-
+*/
 	//====== Sortie ===============================
 	ecrire_fichier_sortie(coloration, g);
 	printf("\nfin.\n");
 	for ( k=0; k<ORDER_MAX; k++ )
 		free(g.adj_matrix[k]);
 	free(g.adj_matrix);
+	free(coloration);
 	return (0);
 }
