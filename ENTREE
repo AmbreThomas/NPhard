@@ -1,8 +1,5 @@
 Bacteria Species : A, B, C, D, E.
 Incompatibility List:
+A, B
 A, C
-B, E
-C, E
-B, D
-C, D
-D, E.
+C, D.

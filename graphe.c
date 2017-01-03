@@ -7,7 +7,12 @@
 	//~ for ( i=1; i<=g.order; i++ ){
 		//~ for ( j=1; j<=g.order; j++ ){
 			//~ if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
-				//~ printf("\nErreur: le sommet %d voisin de %d est colorié avec la même couleur %d", i, j, coloration_trouvee[i]);
+				//~ printstr("\nErreur: le sommet ");
+				//~ printnbr(i);
+				//~ printstr(" voisin de ");
+				//~ printnbr(j);
+				//~ printstr(" est colorie avec la meme couleur "):
+				//~ printnbr(coloration_trouvee[i]);
 				//~ return (0);
 			//~ }
 		//~ }
@@ -17,22 +22,28 @@
 
 void	display_graph(graphe g){
 	int i,j;
-	printf("\n\nDISPLAY graph:\n");
+	printstr("\ngraph:\n");
 	for ( i=0; i<g.order; i++){
-		printf("\n");
+		printstr("\n");
 		for ( j=0; j<g.order; j++ ){
-			printf(" %d", g.adj_matrix[i][j]);
+			printstr(" ");
+			printnbr(g.adj_matrix[i][j]);
 		}
 	}
-	printf("\n");
+	printstr("\n\n");
 }
 
 void	display_vecteur(int* vecteur, graphe g){
 	int i;
-	printf("\n\nDISPLAY couleurs (sommet: couleur):\n");
+	printstr("\n\nDISPLAY couleurs (sommet: couleur):\n");
 	for ( i=0; i<g.order; i++ ){
-		printf(" %d: %d\n", i, vecteur[i]);
+		printstr(" ");
+		printnbr(i);
+		printstr(": ");
+		printnbr(vecteur[i]);
+		printstr("\n");
 	}
+	printstr("\n");
 }
 
 graphe	graph_from_file(graphe g, const char *input_file){
@@ -47,7 +58,9 @@ graphe	graph_from_file(graphe g, const char *input_file){
 	i++;
 	while (input_file[i] != '\n')
 		i++;
-	printf("\n%d espèces à cultiver.\n", order);
+	printstr("\n");
+	printnbr(order);
+	printstr(" especes a cultiver.\n");
 	g.order = order;
 	for ( j=0; j<order; j++ ){
 		for ( k=0; k<order; k++ ){
@@ -74,7 +87,7 @@ graphe	graph_from_file(graphe g, const char *input_file){
 
 //================= ALGORITHME EXACT ==========================
 
-void	remove_from_matrix(int** adj_matrix, int* clique, int from){
+void	remove_from_matrix(int** adj_matrix, int* clique, int len_max_c, int from){
 	int**	old_g_adj;
 	int		i,j,k,to_keep;
 	
@@ -93,8 +106,8 @@ void	remove_from_matrix(int** adj_matrix, int* clique, int from){
 	k = -1;
 	for ( i=0; i<from; i++ ){
 		to_keep = 1;
-		for ( j=0; j<from; j++ )
-			if ( clique[j] == i+1 )
+		for ( j=0; j<len_max_c; j++ )
+			if ( clique[j] == i )
 				to_keep = 0;
 		if ( to_keep == 1){
 			k++;
@@ -111,8 +124,8 @@ void	remove_from_matrix(int** adj_matrix, int* clique, int from){
 	k=-1;
 	for ( i=0; i<from; i++ ){
 		to_keep = 1;
-		for ( j=0; j<from; j++ )
-			if ( clique[j] == i+1 )
+		for ( j=0; j<len_max_c; j++ )
+			if ( clique[j] == i )
 				to_keep = 0;
 		if ( to_keep == 1){
 			k++;
@@ -129,20 +142,41 @@ void	remove_from_matrix(int** adj_matrix, int* clique, int from){
 int		is_clique(graphe g, int* max_clique, int k, int* combin){
 	int i,j;
 
-	for( i=0; i<k; i++ ){
-		for ( j=0; j<k; j++ ){
-			if (combin[i]==j) break;
-			if (g.adj_matrix[max_clique[combin[i]]][max_clique[combin[j]]]==0) return(0);
-		}
+	for( i=0; i<k; i++ )
+		for ( j=0; j<k; j++ )
+			if (combin[i]!=combin[j] && g.adj_matrix[max_clique[combin[i]]][max_clique[combin[j]]]==0) return(0);
+	printstr("   clique de taille ");
+	printnbr(k);
+	printstr(" trouvee : {");
+	for ( i=0; i<k; i++ ){
+		printstr(" ");
+		printnbr(max_clique[combin[i]]);
 	}
-	printf("Clique de taille %d trouvée !\n",k);
+	printstr(" }\n");
 	return (1);
+}
+
+void	disp_combin(int** combin, int n_combi, int k){
+	int i,j;
+
+	i = 0;
+	while ( i<n_combi ){
+		printstr("   ");
+		j = 0;
+		while ( j<k ){
+			printnbr(combin[i][j]);
+			printstr(" ");
+			j++;
+		}
+		printstr("\n");
+		i++;
+	}
 }
 
 int*	bruteforce_search(graphe g){
 	int n = g.order;
 	int couleurs = 0;
-	int i,j,k,l,n_combin;
+	int i,j,k,l,n_combin,croissant;
 	int* coloration;
 	int** combin;
 	int max_clique[n];  // peut contenir au max n noeuds
@@ -150,6 +184,11 @@ int*	bruteforce_search(graphe g){
 	int degree[n];
 
 	// init
+	for (i=0; i<n; i++){
+		for (j=0; j<n; j++)
+			g.adj_matrix[i][j] = 1 - g.adj_matrix[i][j];
+		g.adj_matrix[i][i] = 0;
+	}
 	if ((coloration = (int*)malloc(sizeof(int) * n)) == NULL)
 		return (0);
 	for ( i=0; i<n; i++)
@@ -164,17 +203,21 @@ int*	bruteforce_search(graphe g){
 				k += g.adj_matrix[i][j];
 			degree[i] = k;
 		}
-		printf("\nEncore %d noeuds à colorier.\nDegrés:\n",n);
-		for ( i=0; i<n; i++ )
-			printf("%d ",degree[i]);
-		printf("\nAllons y.\n");
-		
+		printstr("\n==> Encore ");
+		printnbr(n);
+		printstr(" noeuds a colorier.\nDegres: {");
+		for ( i=0; i<n; i++ ){
+			printstr(" ");
+			printnbr(degree[i]);
+		}
+		printstr(" }\n");
 		//=== recherche de la plus grande clique ===
 		len_max_c = 0;
 		k = n;
-		while ( k>0 && len_max_c == 0 )
-		{
-			printf("==>Recherche d'une clique de taille %d...",k);
+		while ( k>0 && len_max_c == 0 ){
+			printstr("Recherche d'une clique de taille ");
+			printnbr(k);
+			printstr("...\n");
 			//chercher si une clique de taille k existe
 			l = 0;
 			for ( i=0; i<n; i++ ){
@@ -186,36 +229,64 @@ int*	bruteforce_search(graphe g){
 			//On a l noeuds de degré >=(k-1), rangés dans max_clique
 			//s'il y en a moins de k: pas de k-clique possible
 			if ( l>=k ){
+				printstr("   clique possible. verifions... ");
+
+
 				//chercher les combinaisons de k noeuds parmi ces l
 				n_combin = combinaisons(l, k);
+				printnbr(n_combin);
+				printstr(" possibilites identifiees\n");
 				if ((combin = (int**)malloc(sizeof(int*)*n_combin))==0)
 					return (0);
 				for ( i=0; i<n_combin; i++)
 					if ((combin[i] = (int*)malloc(sizeof(int)*k))==0)
-						return (0 );
-				for ( j=0; j<k; j++ )
+						return (0);
+				for (i=0; i<n_combin; i++)
+					for (j=0; j<k; j++)
+						combin[i][j] = 0;
+				for ( j=0; j<k; j++ ){
+					combin[n_combin-1][j] = j+l-k;
 					combin[0][j] = j; // la première combinaison est 0,1,2,...,k-1
+				}
 				j = 0;
-				while (combin[j][0] <= (l - k)) // dernière combinaison possible
+				while (j<(n_combin-1)) // dernière combinaison possible
 				{
-					j++;
-					i = 0;
-					while (i < k) {// recopie la précédente combinaison
-						combin[j][i] = combin[j-1][i];
+					i = 1;
+					croissant = 1;
+					while (i < k) //vérifie l'ordre croissant
+					{
+						if (combin[j][i - 1] >= combin[j][i])
+							croissant = 0;
 						i++;
+					}
+					//~ disp_combin(combin, n_combin, k);
+					if (croissant && j==(n_combin-2)) break;
+					if (croissant){
+						j++;
+						i = 0;
+						while (i < k) {// recopie la précédente combinaison
+							combin[j][i] = combin[j-1][i];
+							i++;
+						}
 					}
 					combin[j][k - 1]++; //incrémente la dernière case
 					i = k;
-					while (i) // si une case a dépassé l, on passe à la case précédente
+					while (i) // si une case a atteint l, on passe à la case précédente
 					{
 						i--;
-						if (combin[j][i] > l - 1)
+						if (combin[j][i] == l )
 						{
-							if (i) combin[j][i - 1]++;
-							combin[j][i] = 0;
+							if (i)
+								combin[j][i - 1]++;
+							combin[j][i] = 0 ;
 						}
 					}
 				}
+
+
+
+
+
 				//pour chaque combinaison, vérifier si c'est une clique:
 				for ( i=0; i<n_combin; i++ ){
 					if (is_clique(g, max_clique, k, combin[i])){
@@ -226,40 +297,56 @@ int*	bruteforce_search(graphe g){
 						break;
 					}
 				}
+				
 				for ( i=0; i<n_combin; i++ )
 					free(combin[i]);
 				free(combin);
+				combin = 0;
 			}
 			k--;
 		}
+		k++;
 		//=== colorier la clique trouvée ===
 		couleurs++;
-		for ( i=0; i<len_max_c; i++ ){
-			coloration[max_clique[i]] = couleurs;
+		i = 0;
+		j = 0;
+		l = 0;
+		while ( i<len_max_c ){
+			if (coloration[l] != 0)
+				j++;
+			if (coloration[l] == 0 && l == (max_clique[i]+j)){
+				coloration[l] = couleurs;
+				i++;
+			}
+			l++;
 		}
+
 		//=== soustraire la clique trouvée au graphe g ===
 		n -= len_max_c;
-		printf(" J'en retire %d, on aura n=%d.\n",k,n);
-		remove_from_matrix(g.adj_matrix, max_clique, g.order);
+		printstr("   je retire ");
+		printnbr(k);
+		printstr(" noeuds, on aura n=");
+		printnbr(n);
+		printstr(".\n");
+		remove_from_matrix(g.adj_matrix, max_clique, len_max_c, g.order);
 		g.order = n;
 	}
-	display_graph(g);
 	return (coloration);
 }
 
 
 //================= ALGORITHME GLOUTON ==========================
-/*
+
 int*	copyYdansZ(int* destination, int* origine, graphe g){
 	int i;
-	for ( i=1; i<=g.order; i++ )
+	for ( i=0; i<g.order; i++ )
 		destination[i] = origine[i];
 	return (destination);
 }
 
 int		premier_sommet_de_Z(int* vecteur, graphe g){
 	int i;
-	for ( i=1; i<=g.order; i++ )
+	for ( i=0; i<g.order; i++ )
 		if ( vecteur[i] == 0 )
 			return (i);
 	return (-1);
@@ -269,7 +356,7 @@ int*	retirer_s_et_ses_voisins(int s, int* vecteur, graphe g){
 	int i;
 	vecteur[s] = 1;
 	vecteur[g.order + 1]++;
-	for ( i=1; i<=g.order; i++)
+	for ( i=0; i<g.order; i++)
 		if ( (g.adj_matrix[s][i] > 0) && (vecteur[i] == 0)){
 			vecteur[g.order + 1]++;
 			vecteur[i] = 1;
@@ -282,16 +369,14 @@ int*	glouton(graphe g){
 	int* Y;
 	int* Z;
 	int cardY = 0;
-	int cardZ = 0;
 	int color = 0;
 
-	printf("\n================= GLOUTON ==================\n");
-	Y = (int *)malloc(sizeof(int)*(g.order+2));
-	Z = (int *)malloc(sizeof(int)*(g.order+2));
+	Y = (int *)malloc(sizeof(int)*(g.order+1));
+	Z = (int *)malloc(sizeof(int)*(g.order+1));
 	Z[g.order+1] = 0; //contient cardZ
 
 	//init:
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		Y[i] = 0;
 		Z[i] = 0;
 	}
@@ -299,10 +384,14 @@ int*	glouton(graphe g){
 		Z = copyYdansZ(Z, Y, g);
 		Z[g.order+1] = cardY;
 		color++;
-		printf("\n\tChangement de couleur à %d", color);
+		printstr("\n\tChangement de couleur a ");
+		printnbr(color);
 		while ( Z[g.order+1] < g.order ){
 			s = premier_sommet_de_Z(Z,g);
-			printf("\ncoloration de y=%d avec color=%d", s, color);
+			printstr("\ncoloration de ");
+			printnbr(s);
+			printstr(" avec la couleur ");
+			printnbr(color);
 			Y[s] = color;
 			cardY++;
 			Z = retirer_s_et_ses_voisins(s,Z,g);
@@ -331,7 +420,7 @@ void	init_dsat(graphe g){
 int		sommet_non_colorie_de_dsat_max(graphe g){
 	int v,i,dsat_max_local = 0;
 	for ( i=1; i<=g.order; i++ ){
-		if (coloration_trouvee[i] = 0){
+		if (coloration_trouvee[i] == 0){
 			if (dsat[i] > dsat_max_local){
 				v = i;
 				dsat_max_local = dsat[i];
@@ -358,6 +447,7 @@ int		coloration_avec_couleur_minimum(int t, graphe g){
 			return (i);
 		}
 	}
+	return (0);
 }
 
 int	 	nb_de_couleurs_differentes_autour_de(int t, graphe g){
@@ -390,14 +480,17 @@ void	maj_du_vecteur_dsat(int t, graphe g){
 }
 
 void	dsatur(graphe g){
-	int i,j,s;
-	printf("\n================== DSATUR ======================\n");
+	int i,s;
+	printstr("\n================== DSATUR ======================\n");
 	init_dsat(g);
 	for ( i=1; i<=g.order; i++ ){
 		s = sommet_non_colorie_de_dsat_max(g);
 		coloration_trouvee[s] = coloration_avec_couleur_minimum(s,g);
-		printf("\n s=%d coloré par %d", s, coloration_trouvee[s]);
+		printstr("\n s=");
+		printnbr(s);
+		printstr(" coloré par ");
+		printnbr(coloration_trouvee[s]);
 		maj_du_vecteur_dsat(s,g);
 	}
 }
-*/
+

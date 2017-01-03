@@ -35,3 +35,6 @@ int*	bruteforce_search(graphe g);
 int		combinaisons(int n, int k);
 void	display_graph(graphe g);
 void	display_vecteur(int *vecteur, graphe g);
+void	printstr(const char* texte);
+void	printnbr(int n);
+void	disp_combin( int** combin, int n_combi, int k);

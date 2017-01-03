@@ -55,3 +55,30 @@ int		combinaisons(int n, int k)
 		C[i + 1] = (C[i] * (n - i)) / (i + 1);
 	return (int)(C[k]);
 }
+
+void	printstr(const char* texte)
+{
+	int i = 0;
+	while (texte[i]){
+		write(1,&texte[i++],1);
+	}
+}
+
+void	printnbr(int n)
+{
+	char c;
+	
+	if (n==-2147483648)
+		printstr("-2147483648");
+	else
+	{
+		if (n<0){
+			printstr("-");
+			n = -n;
+		}
+		if (n>=10)
+			printnbr(n/10);
+		c = n%10 + '0';
+		write(1,&c,1);
+	}
+}
