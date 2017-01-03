@@ -85,16 +85,16 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 		i++;
 	}
 	sortie_fichier[i] = 0;
-	i = 1;
+	i = 0;
 	while (i <= max_boites)
 	{
-		k = 1;
+		k = 0;
 		flag = 0;
-		while (k <= g.order)
+		while (k < g.order)
 		{
 			if (coloration[k] == i)
 			{
-				sortie_fichier[i][flag++] = k + 64;
+				sortie_fichier[i][flag++] = k + 65;
 				sortie_fichier[i][flag++] = ',';
 			}
 			k++;
