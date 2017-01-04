@@ -18,9 +18,10 @@ int	main(void){
 
 	//======= affichage ===========================
 	printstr(input_file);
-	display_graph(g);
+	display_graph(g, g.order);
 
 	//======= recherche brute =====================
+
 //	printstr("========== Algorithme par clique max ===========\n");
 //	coloration = bruteforce_search(g);
 //	display_vecteur(coloration, g);
@@ -49,8 +50,12 @@ int	main(void){
 //	coloration = dsatur(g);
 //	display_vecteur(coloration, g);
 
+
+	printstr("========== Algorithme de Zykov ===========\n");
+	coloration = zykov(g);
+	display_vecteur(coloration, g.order);
+
 	//====== Sortie ===============================
-	display_graph(g);
 	ecrire_fichier_sortie(coloration, g);
 	if (verif_color(g, coloration)==1){
 		printstr("\n Bonne coloration\n");
