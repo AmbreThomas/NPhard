@@ -9,25 +9,9 @@
 
 #include "graphe.h"
 
-//================================ UTILITAIRES ===========================
-
-int		verif_color(graphe g, int* coloration_trouvee){
-	int i,j;
-	for ( i=0; i<g.order; i++ ){
-		for ( j=0; j<g.order; j++ ){
-			if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
-				printstr("\nErreur: le sommet ");
-				printnbr(i);
-				printstr(" voisin de ");
-				printnbr(j);
-				printstr(" est colorie avec la meme couleur ");
-				printnbr(coloration_trouvee[i]);
-				return (0);
-			}
-		}
-	}
-	return (1);
-}
+//======================================================================
+//============================== UTILITAIRES ===========================
+//======================================================================
 
 void	display_graph(graphe g, int n){
 	int i,j;
@@ -88,10 +72,14 @@ graphe	graph_from_file(graphe g, const char *input_file){
 		g.adj_matrix[j][k] = 1;
 		if (input_file[i] != '.') i++;
 	}
+	for ( i=0; i<g.order; i++ )
+		g.coloration[i] = 0;
 	return (g);
 }
 
-//================= ALGORITHME ZYKOV ==============================
+//======================================================================
+//================= ALGORITHME ZYKOV ===================================
+//======================================================================
 
 int		deg_max(int* degree, int n){
 	int i, max;
@@ -179,21 +167,16 @@ int		contract(int from_node, int to_node, graphe g, int n, int* node_index){
 	return to_node;
 }
 
-int*	zykov(graphe g){
+void	zykov(graphe g){
 	int		degree[g.order];
-	int*	coloration;
 	int		node_index[g.order];
 	int 	couleurs = 0;
 	int		i,j,s,t;
 	int		n = g.order;
 
 	//init
-	if ((coloration = (int*)malloc(sizeof(int) * g.order)) == NULL)
-		return (0);
-	for ( i=0; i<g.order; i++ ){
-		coloration[i] = 0;
+	for ( i=0; i<g.order; i++ )
 		node_index[i] = i;
-	}
 
 	//go
 	while (n){
@@ -203,16 +186,16 @@ int*	zykov(graphe g){
 				if (g.adj_matrix[i][j]==1) degree[i]++;
 		}
 		s = deg_max(degree, n);
-		coloration[node_index[s]] = ++couleurs;
-		printstr("Coloration de ");
+		g.coloration[node_index[s]] = ++couleurs;
+		printstr("coloration de ");
 		printnbr(node_index[s]);
 		printstr(" avec la couleur ");
 		printnbr(couleurs);
 		printstr("\n");
 		while (is_voisin_universel(g,n,s)==0){
 			t = max_voisins_non_voisin(g,n,s);
-			coloration[node_index[t]] = couleurs;
-			printstr("Coloration de ");
+			g.coloration[node_index[t]] = couleurs;
+			printstr("coloration de ");
 			printnbr(node_index[t]);
 			printstr(" avec la couleur ");
 			printnbr(couleurs);
@@ -223,10 +206,11 @@ int*	zykov(graphe g){
 		remove_from_g(s,g,n,node_index);
 		n--;
 	}
-	return (coloration);
 }
 
-//================= ALGORITHME MAX_CLIQUE ==========================
+//======================================================================
+//================= ALGORITHME MAX_CLIQUE ==============================
+//======================================================================
 
 void	remove_from_matrix(int** adj_matrix, int* clique, int len_max_c, int from){
 	int**	old_g_adj;
@@ -314,11 +298,10 @@ void	disp_combin(int** combin, int n_combi, int k){
 	}
 }
 
-int*	bruteforce_search(graphe g){
+void	bruteforce_search(graphe g){
 	int n = g.order;
 	int couleurs = 0;
 	int i,j,k,l,n_combin,croissant;
-	int* coloration;
 	int** combin;
 	int max_clique[n];  // peut contenir au max n noeuds
 	int len_max_c; // toujours <= n
@@ -330,10 +313,6 @@ int*	bruteforce_search(graphe g){
 			g.adj_matrix[i][j] = 1 - g.adj_matrix[i][j];
 		g.adj_matrix[i][i] = 0;
 	}
-	if ((coloration = (int*)malloc(sizeof(int) * n)) == NULL)
-		return (0);
-	for ( i=0; i<n; i++)
-		coloration[i++] = 0;
 
 	//boucle principale
 	while (n>0)
@@ -378,10 +357,10 @@ int*	bruteforce_search(graphe g){
 				printnbr(n_combin);
 				printstr(" possibilites identifiees\n");
 				if ((combin = (int**)malloc(sizeof(int*)*n_combin))==0)
-					return (0);
+					return;
 				for ( i=0; i<n_combin; i++)
 					if ((combin[i] = (int*)malloc(sizeof(int)*k))==0)
-						return (0);
+						return;
 				for (i=0; i<n_combin; i++)
 					for (j=0; j<k; j++)
 						combin[i][j] = 0;
@@ -453,10 +432,10 @@ int*	bruteforce_search(graphe g){
 		j = 0;
 		l = 0;
 		while ( i<len_max_c ){
-			if (coloration[l] != 0)
+			if (g.coloration[l] != 0)
 				j++;
-			if (coloration[l] == 0 && l == (max_clique[i]+j)){
-				coloration[l] = couleurs;
+			if (g.coloration[l] == 0 && l == (max_clique[i]+j)){
+				g.coloration[l] = couleurs;
 				i++;
 			}
 			l++;
@@ -472,10 +451,11 @@ int*	bruteforce_search(graphe g){
 		remove_from_matrix(g.adj_matrix, max_clique, len_max_c, g.order);
 		g.order = n;
 	}
-	return (coloration);
 }
 
-//================= ALGORITHME GLOUTON ==========================
+//======================================================================
+//================= ALGORITHME GLOUTON =================================
+//======================================================================
 
 int*	copyYdansZ(int* destination, int* origine, graphe g){
 	int i;
@@ -504,24 +484,23 @@ int*	retirer_s_et_ses_voisins(int s, int* vecteur, graphe g){
 	return (vecteur);
 }
 
-int*	glouton1(graphe g){
+void	glouton1(graphe g){
 	int i,s;
-	int* Y;
 	int* Z;
 	int cardY = 0;
 	int color = 0;
 
-	Y = (int *)malloc(sizeof(int)*(g.order+1));
-	Z = (int *)malloc(sizeof(int)*(g.order+1));
+	if ((Z = (int *)malloc(sizeof(int)*(g.order+2))) == NULL)
+		return;
 	Z[g.order+1] = 0; //contient cardZ
 
 	//init:
 	for ( i=0; i<g.order; i++ ){
-		Y[i] = 0;
+		g.coloration[i] = 0;
 		Z[i] = 0;
 	}
 	while ( cardY < g.order ){
-		Z = copyYdansZ(Z, Y, g);
+		Z = copyYdansZ(Z, g.coloration, g);
 		Z[g.order+1] = cardY;
 		color++;
 		printstr("\n   Changement de couleur pour ");
@@ -532,187 +511,184 @@ int*	glouton1(graphe g){
 			printnbr(s);
 			printstr(" avec la couleur ");
 			printnbr(color);
-			Y[s] = color;
+			g.coloration[s] = color;
 			cardY++;
 			Z = retirer_s_et_ses_voisins(s,Z,g);
 		}
 	}
-	return (Y);
+	printstr("\n");
+	free(Z);
 }
 
-//=============== ALGORITHME GLOUTON II ==========================
+//======================================================================
+//=============== ALGORITHME GLOUTON II ================================
+//======================================================================
 
-int     comptage(int *boite)
-{
-        int nombre;
-        
-        nombre = 0;
-        while (boite[nombre])
-                nombre++;
-        return (nombre);
+
+int		comptage(int *boite){
+	int nombre;
+	
+	nombre = 0;
+	while (boite[nombre])
+		nombre++;
+	return (nombre);
 }
 
-int     compatible(graphe g, int j, int *boite)
-{
-        int i;
-        
-        i = 0;
-        while (boite[i])
-        {
-                if (g.adj_matrix[boite[i] - 1][j] == 1)
-                        return (0);
-                i++;
-        }
-        return (1);
+int		compatible(graphe g, int j, int *boite){
+	int i;
+	
+	i = 0;
+	while (boite[i])
+	{
+		if (g.adj_matrix[boite[i] - 1][j] == 1)
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
-void        printboites(int ***boites, int i, graphe g)
-{
-        int j;
-        int k;
-        
-        j = -1;
-        while (++j < g.order)
-        {
-                k = -1;
-                while (++k  < g.order)
-                {
-                        printnbr(boites[i][j][k]);
-                }
-                printstr("\n");
-        }
+void	printboites(int ***boites, int i, graphe g){
+	int j;
+	int k;
+	
+	j = -1;
+	while (++j < g.order)
+	{
+		k = -1;
+		while (++k  < g.order)
+		{
+			printnbr(boites[i][j][k]);
+		}
+		printstr("\n");
+	}
 }
 
-int     meilleure(int ***boites, graphe g)
-{
-        int i;
-        int temp;
-        int j;
-        
-        i = -1;
-        temp = g.order;
-        while (++i < g.order)
-        {
-                j = 0;
-                while (boites[i][j][0] != 0)
-                        j++;
-                if (temp > j)
-                        temp = j;
-        }
-        i = -1;
-        while (++i < g.order)
-        {
-            j = 0;
-            while (boites[i][j][0] != 0)
-                    j++;
-            if (j == temp)
-                    return (i);
-        }
-        return (0);
+int		meilleure(int ***boites, graphe g){
+	int i;
+	int temp;
+	int j;
+	
+	i = -1;
+	temp = g.order;
+	while (++i < g.order)
+	{
+		j = 0;
+		while (boites[i][j][0] != 0)
+			j++;
+		if (temp > j)
+			temp = j;
+	}
+	i = -1;
+	while (++i < g.order)
+	{
+		j = 0;
+		while (boites[i][j][0] != 0)
+			j++;
+		if (j == temp)
+			return (i);
+	}
+	return (0);
 }
 
-int     *glouton2(graphe g)
-{
-        int *coloration;
-        int i;
-        int j;
-        int k;
-        int nombre_boites;
-        int place;
-        int nombre_bacterie;
-        int ***boites;
-        
-        //initialise les boites
-        i = -1;
-        boites = (int***)malloc(sizeof(int**) * g.order);
-        while (++i < g.order)
-        {
-                j = -1;
-                boites[i] = (int**)malloc(sizeof(int*) * g.order);
-                while (++j < g.order)
-                {
-                        k = -1;
-                        boites[i][j] = (int*)malloc(sizeof(int) * g.order);
-                        while (++k < g.order)
-                        {
-                                boites[i][j][k] = 0;
-                        }
-                }
-        }
-        //boucle principale
-        i = -1;
-        while (++i < g.order)
-        {
-                nombre_boites = 0;
-                boites[i][nombre_boites][0] = i + 1;
-                j = i + 1;
-                if (j == g.order)
-                        j = 0;
-                while (j != i && j != g.order)
-                {
-                        k = -1;
-                        place = 0;
-                        while (k++ < nombre_boites && place == 0)
-                        {
-                                nombre_bacterie = comptage(boites[i][k]);
-                                if (compatible(g, j, boites[i][k]))
-                                {
-                                        boites[i][k][nombre_bacterie] = j + 1;
-                                        place = 1;
-                                }
-                        }
-                        if (place == 0)
-                        {
-                                nombre_boites++;
-                                boites[i][k][0] = j + 1;
-                        }
-                        if (i == 0 && j + 1 == g.order)
-                                break;
-                        if (j + 1 == g.order)
-                                j = -1;
-                        j++;
-                }
-        }
-        //analyse du tableau 3D "boites"
-        nombre_boites = meilleure(boites, g);
-        //coloration de la meilleure solution
-        coloration = (int*)malloc(sizeof(int) * g.order);
-        i = -1;
-        while (++i < g.order)
-                coloration[i] = 0;
-        i = -1;
-        while (++i < g.order)
-        {
-                j = -1;
-                while (++j < g.order)
-                {
-                        if (boites[nombre_boites][i][j] !=0)
-                                coloration[boites[nombre_boites][i][j] - 1] = i +1;
-                }
-        }
-        i = -1;
-        while (++i < g.order)
-        {
-            j = -1;
-            while (++j < g.order)
-                    free(boites[i][j]);
-            free(boites[i]);
-        }
-        free(boites);
-        return (coloration);
+void	glouton2(graphe g){
+	int i;
+	int j;
+	int k;
+	int nombre_boites;
+	int place;
+	int nombre_bacterie;
+	int ***boites;
+	
+	//initialise les boites
+	i = -1;
+	boites = (int***)malloc(sizeof(int**) * g.order);
+	while (++i < g.order)
+	{
+		j = -1;
+		boites[i] = (int**)malloc(sizeof(int*) * g.order);
+		while (++j < g.order)
+		{
+			k = -1;
+			boites[i][j] = (int*)malloc(sizeof(int) * g.order);
+			while (++k < g.order)
+			{
+				boites[i][j][k] = 0;
+			}
+		}
+	}
+	//boucle principale
+	i = -1;
+	while (++i < g.order)
+	{
+		nombre_boites = 0;
+		boites[i][nombre_boites][0] = i + 1;
+		j = i + 1;
+		if (j == g.order)
+			j = 0;
+		while (j != i && j != g.order)
+		{
+			k = -1;
+			place = 0;
+			while (k++ < nombre_boites && place == 0)
+			{
+				nombre_bacterie = comptage(boites[i][k]);
+				if (compatible(g, j, boites[i][k]))
+				{
+					boites[i][k][nombre_bacterie] = j + 1;
+					place = 1;
+				}
+			}
+			if (place == 0)
+			{
+				nombre_boites++;
+				boites[i][k][0] = j + 1;
+			}
+			if (i == 0 && j + 1 == g.order)
+				break;
+			if (j + 1 == g.order)
+				j = -1;
+			j++;
+		}
+	}
+	//analyse du tableau 3D "boites"
+	nombre_boites = meilleure(boites, g);
+	//coloration de la meilleure solution
+	i = -1;
+	while (++i < g.order)
+		g.coloration[i] = 0;
+	i = -1;
+	while (++i < g.order)
+	{
+		j = -1;
+		while (++j < g.order)
+		{
+			if (boites[nombre_boites][i][j] !=0)
+				g.coloration[boites[nombre_boites][i][j] - 1] = i +1;
+		}
+	}
+	i = -1;
+	while (++i < g.order)
+	{
+		j = -1;
+		while (++j < g.order)
+			free(boites[i][j]);
+		free(boites[i]);
+	}
+	free(boites);
 }
 
-//=============== ALGORITHME DSATUR ==========================
+//======================================================================
+//=============== ALGORITHME DSATUR ====================================
+//======================================================================
 
 int dsat[ORDER_MAX];
 int degre[ORDER_MAX];
-int coloration_trouvee[ORDER_MAX];
 
 void	init_dsat(graphe g){
 	int i,j;
 	for ( i=0; i<g.order; i++ ){
 		dsat[i] = 1; //on commence �  1 pour ne pas avoir de dsat nul si noeud non adjacent �  un autre noeud
-		coloration_trouvee[i] = 0;
+		g.coloration[i] = 0;
 		for ( j=0; j<g.order; j++ ){
 			if ( g.adj_matrix[i][j] ) dsat[i]++;
 		}
@@ -723,7 +699,7 @@ void	init_dsat(graphe g){
 int		sommet_non_colorie_de_dsat_max(graphe g){
 	int v,i,dsat_max_local = 0;
 	for ( i=0; i<g.order; i++ ){
-		if (coloration_trouvee[i] == 0){
+		if (g.coloration[i] == 0){
 			if (dsat[i] > dsat_max_local){
 				v = i;
 				dsat_max_local = dsat[i];
@@ -740,8 +716,8 @@ int		coloration_avec_couleur_minimum(int t, graphe g){
 	for ( i=0; i<g.order; i++ )
 		color_used[i] = 0;
 	for ( i=0; i<g.order; i++ ){
-		if ( (g.adj_matrix[t][i]==1) && (coloration_trouvee[i] > 0)){
-			color_used[coloration_trouvee[i]-1] = 1;
+		if ( (g.adj_matrix[t][i]==1) && (g.coloration[i] > 0)){
+			color_used[g.coloration[i]-1] = 1;
 		}
 	}
 	//on colorie t par la plus petite couleur non utilisée au voisinnage:
@@ -760,8 +736,8 @@ int	 	nb_de_couleurs_differentes_autour_de(int t, graphe g){
 	for ( i=0; i<g.order; i++ )
 		color_used[i] = 0;
 	for ( i=0; i<g.order; i++ ){
-		if ( (g.adj_matrix[t][i]) && (coloration_trouvee[i]>0)){
-			color_used[coloration_trouvee[i]-1] = 1;
+		if ( (g.adj_matrix[t][i]) && (g.coloration[i]>0)){
+			color_used[g.coloration[i]-1] = 1;
 		}
 	}
 	nb_de_couleurs_utilisees_autour_de_t = 0;
@@ -772,27 +748,27 @@ int	 	nb_de_couleurs_differentes_autour_de(int t, graphe g){
 
 void	maj_du_vecteur_dsat(int t, graphe g){
 	int i;
-	//synthèse pour que le sommet actuellement colorié soit
-	//rapidement ecarté pour les autres choix
+	//synthese pour que le sommet actuellement colorié soit
+	//rapidement ecartee pour les autres choix
 	dsat[t] = -1;
 	for ( i=0; i<g.order; i++ ){
-		if ( (g.adj_matrix[t][i]==1) && (coloration_trouvee[i]==0)){
+		if ( (g.adj_matrix[t][i]==1) && (g.coloration[i]==0)){
 			dsat[i] = nb_de_couleurs_differentes_autour_de(i,g);
 		}
 	}
 }
 
-int*	dsatur(graphe g){
+void	dsatur(graphe g){
 	int i,s;
 	init_dsat(g);
 	for ( i=0; i<g.order; i++ ){
 		s = sommet_non_colorie_de_dsat_max(g);
-		coloration_trouvee[s] = coloration_avec_couleur_minimum(s,g)+1;
+		g.coloration[s] = coloration_avec_couleur_minimum(s,g)+1;
 		printstr("\n n");
 		printnbr(s);
-		printstr(" coloré par ");
-		printnbr(coloration_trouvee[s]);
+		printstr(" colorie par ");
+		printnbr(g.coloration[s]);
 		maj_du_vecteur_dsat(s,g);
 	}
-	return (coloration_trouvee);
+	printstr("\n");
 }

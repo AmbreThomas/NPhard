@@ -73,7 +73,7 @@ char*	ouvrir_fichier(char* fichier){
 	return (buf);
 }
 
-void	ecrire_fichier_sortie(int *coloration, graphe g){
+void	ecrire_fichier_sortie(graphe g){
 	int i, k, max_boites, flag;
 	char *stock_itoa;
 	char **sortie_fichier;
@@ -82,7 +82,7 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 	FILE* sortie = NULL;
 
 	sortie = fopen("sortie", "w");
-	max_boites = int_max(coloration, g.order);
+	max_boites = int_max(g.coloration, g.order);
 	sortie_fichier = (char**)malloc(sizeof(char*) * (max_boites + 2));
 	stock_itoa = ft_itoa(max_boites);
 	sortie_fichier[0] = (char*)malloc(strlen("We use  petri dishes.\n") + strlen(stock_itoa) + 1);
@@ -90,7 +90,7 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 	i = 1;
 	while (i <= max_boites)
 	{
-		sortie_fichier[i] = (char*)malloc(nb_occurences_int(coloration, g.order, i) + 1);
+		sortie_fichier[i] = (char*)malloc(nb_occurences_int(g.coloration, g.order, i) + 1);
 		i++;
 	}
 	sortie_fichier[i] = 0;
@@ -101,7 +101,7 @@ void	ecrire_fichier_sortie(int *coloration, graphe g){
 		flag = 0;
 		while (k < g.order)
 		{
-			if (coloration[k] == i)
+			if (g.coloration[k] == i)
 			{
 				sortie_fichier[i][flag++] = k + 65;
 				sortie_fichier[i][flag++] = ',';
