@@ -2,23 +2,23 @@
 
 //================================ UTILITAIRES ===========================
 
-//~ int		verif_color(graphe g){
-	//~ int i,j;
-	//~ for ( i=1; i<=g.order; i++ ){
-		//~ for ( j=1; j<=g.order; j++ ){
-			//~ if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
-				//~ printstr("\nErreur: le sommet ");
-				//~ printnbr(i);
-				//~ printstr(" voisin de ");
-				//~ printnbr(j);
-				//~ printstr(" est colorie avec la meme couleur "):
-				//~ printnbr(coloration_trouvee[i]);
-				//~ return (0);
-			//~ }
-		//~ }
-	//~ }
-	//~ return (1);
-//~ }
+int		verif_color(graphe g, int* coloration_trouvee){
+	int i,j;
+	for ( i=0; i<g.order; i++ ){
+		for ( j=0; j<g.order; j++ ){
+			if ( (g.adj_matrix[i][j]==1) && (coloration_trouvee[i]==coloration_trouvee[j])){
+				printstr("\nErreur: le sommet ");
+				printnbr(i);
+				printstr(" voisin de ");
+				printnbr(j);
+				printstr(" est colorie avec la meme couleur ");
+				printnbr(coloration_trouvee[i]);
+				return (0);
+			}
+		}
+	}
+	return (1);
+}
 
 void	display_graph(graphe g){
 	int i,j;
@@ -58,9 +58,6 @@ graphe	graph_from_file(graphe g, const char *input_file){
 	i++;
 	while (input_file[i] != '\n')
 		i++;
-	printstr("\n");
-	printnbr(order);
-	printstr(" especes a cultiver.\n");
 	g.order = order;
 	for ( j=0; j<order; j++ ){
 		for ( k=0; k<order; k++ ){
@@ -368,7 +365,7 @@ int*	retirer_s_et_ses_voisins(int s, int* vecteur, graphe g){
 	return (vecteur);
 }
 
-int*	glouton(graphe g){
+int*	glouton1(graphe g){
 	int i,s;
 	int* Y;
 	int* Z;
@@ -388,7 +385,7 @@ int*	glouton(graphe g){
 		Z = copyYdansZ(Z, Y, g);
 		Z[g.order+1] = cardY;
 		color++;
-		printstr("\n\tChangement de couleur a ");
+		printstr("\n   Changement de couleur pour ");
 		printnbr(color);
 		while ( Z[g.order+1] < g.order ){
 			s = premier_sommet_de_Z(Z,g);
@@ -412,18 +409,19 @@ int coloration_trouvee[ORDER_MAX];
 
 void	init_dsat(graphe g){
 	int i,j;
-	for ( i=1; i<=g.order; i++ ){
-		dsat[i] = 0;
+	for ( i=0; i<g.order; i++ ){
+		dsat[i] = 1; //on commence à 1 pour ne pas avoir de dsat nul si noeud non adjacent à un autre noeud
 		coloration_trouvee[i] = 0;
-		for ( j=1; j<=g.order; j++ ){
+		for ( j=0; j<g.order; j++ ){
 			if ( g.adj_matrix[i][j] ) dsat[i]++;
 		}
 	}
+	//ici, dsat vaut degré + 1
 }
 
 int		sommet_non_colorie_de_dsat_max(graphe g){
 	int v,i,dsat_max_local = 0;
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		if (coloration_trouvee[i] == 0){
 			if (dsat[i] > dsat_max_local){
 				v = i;
@@ -438,15 +436,15 @@ int		coloration_avec_couleur_minimum(int t, graphe g){
 	int i;
 	int color_used[ORDER_MAX];
 	//init:
-	for ( i=1; i<=g.order; i++ )
+	for ( i=0; i<g.order; i++ )
 		color_used[i] = 0;
-	for ( i=1; i<=g.order; i++ ){
-		if ( (g.adj_matrix[t][i]) && (coloration_trouvee[i] > 0)){
-			color_used[coloration_trouvee[i]] = 1;
+	for ( i=0; i<g.order; i++ ){
+		if ( (g.adj_matrix[t][i]==1) && (coloration_trouvee[i] > 0)){
+			color_used[coloration_trouvee[i]-1] = 1;
 		}
 	}
 	//on colorie t par la plus petite couleur non utilisée au voisinnage:
-	for ( i=1; i<=g.order; i++){
+	for ( i=0; i<g.order; i++){
 		if ( color_used[i] == 0 ){
 			return (i);
 		}
@@ -458,15 +456,15 @@ int	 	nb_de_couleurs_differentes_autour_de(int t, graphe g){
 	int i, nb_de_couleurs_utilisees_autour_de_t;
 	int color_used[ORDER_MAX];
 	//init:
-	for ( i=1; i<=g.order; i++ )
+	for ( i=0; i<g.order; i++ )
 		color_used[i] = 0;
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		if ( (g.adj_matrix[t][i]) && (coloration_trouvee[i]>0)){
-			color_used[coloration_trouvee[i]] = 1;
+			color_used[coloration_trouvee[i]-1] = 1;
 		}
 	}
 	nb_de_couleurs_utilisees_autour_de_t = 0;
-	for ( i=1; i<=g.order; i++ )
+	for ( i=0; i<g.order; i++ )
 		if (color_used[i] == 1) nb_de_couleurs_utilisees_autour_de_t++;
 	return (nb_de_couleurs_utilisees_autour_de_t);
 }
@@ -476,25 +474,25 @@ void	maj_du_vecteur_dsat(int t, graphe g){
 	//synthèse pour que le sommet actuellement colorié soit
 	//rapidement ecarté pour les autres choix
 	dsat[t] = -1;
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		if ( (g.adj_matrix[t][i]==1) && (coloration_trouvee[i]==0)){
 			dsat[i] = nb_de_couleurs_differentes_autour_de(i,g);
 		}
 	}
 }
 
-void	dsatur(graphe g){
+int*	dsatur(graphe g){
 	int i,s;
-	printstr("\n================== DSATUR ======================\n");
 	init_dsat(g);
-	for ( i=1; i<=g.order; i++ ){
+	for ( i=0; i<g.order; i++ ){
 		s = sommet_non_colorie_de_dsat_max(g);
-		coloration_trouvee[s] = coloration_avec_couleur_minimum(s,g);
-		printstr("\n s=");
+		coloration_trouvee[s] = coloration_avec_couleur_minimum(s,g)+1;
+		printstr("\n n");
 		printnbr(s);
 		printstr(" coloré par ");
 		printnbr(coloration_trouvee[s]);
 		maj_du_vecteur_dsat(s,g);
 	}
+	return (coloration_trouvee);
 }
 

@@ -38,3 +38,6 @@ void	display_vecteur(int *vecteur, graphe g);
 void	printstr(const char* texte);
 void	printnbr(int n);
 void	disp_combin( int** combin, int n_combi, int k);
+int*	glouton1(graphe g);
+int*	dsatur(graphe g);
+int		verif_color(graphe g, int* coloration_trouvee);
