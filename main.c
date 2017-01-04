@@ -21,28 +21,33 @@ int	main(void){
 	display_graph(g);
 
 	//======= recherche brute =====================
-	printstr("========== Algorithme par clique max ===========\n");
-	coloration = bruteforce_search(g);
-	display_vecteur(coloration, g);
-	free(coloration);
-	for ( k=0; k<ORDER_MAX; k++ )
-		free(g.adj_matrix[k]);
-	free(g.adj_matrix);
-	g = graph_from_file(g, input_file);
-
-	//~ printstr("========== Algorithme de Zykov ===========\n");
-	//~ display_vecteur(coloration, g);
-
-	display_graph(g);
+//	printstr("========== Algorithme par clique max ===========\n");
+//	coloration = bruteforce_search(g);
+//	display_vecteur(coloration, g);
+//	free(coloration);
+//	for ( k=0; k<ORDER_MAX; k++ )
+//		free(g.adj_matrix[k]);
+//	free(g.adj_matrix);
+//	g = graph_from_file(g, input_file);
+//
+//	//~ printstr("========== Algorithme de Zykov ===========\n");
+//	//~ display_vecteur(coloration, g);
+//
+//	display_graph(g);
 
 	//====== Glouton ==============================
-	printf("========== Recherche approchée gloutonne ===========\n");
-	coloration = glouton1(g);
-	display_vecteur(coloration, g);
+	//printf("========== Recherche approchée gloutonne ===========\n");
+	//coloration = glouton1(g);
+	//display_vecteur(coloration, g);
+	//
+	//====== Glouton2 ==============================
+        coloration = glouton2(g);
+        display_vecteur(coloration, g);
 
-	printf("========== Recherche approchée par DSATUR ===========\n");
-	coloration = dsatur(g);
-	display_vecteur(coloration, g);
+
+//	printf("========== Recherche approchée par DSATUR ===========\n");
+//	coloration = dsatur(g);
+//	display_vecteur(coloration, g);
 
 	//====== Sortie ===============================
 	display_graph(g);

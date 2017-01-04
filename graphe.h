@@ -41,3 +41,6 @@ void	disp_combin( int** combin, int n_combi, int k);
 int*	glouton1(graphe g);
 int*	dsatur(graphe g);
 int		verif_color(graphe g, int* coloration_trouvee);
+int     *glouton2(graphe g);
+int     comptage(int *boite);
+int     compatible(graphe g, int j, int *boite);

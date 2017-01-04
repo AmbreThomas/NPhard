@@ -272,7 +272,7 @@ int*	bruteforce_search(graphe g){
 					}
 					combin[j][k - 1]++; //incrémente la dernière case
 					i = k;
-					while (i) // si une case a atteint l, on passe à la case précédente
+					while (i) // si une case a atteint l, on passe �  la case précédente
 					{
 						i--;
 						if (combin[j][i] == l )
@@ -401,6 +401,159 @@ int*	glouton1(graphe g){
 	return (Y);
 }
 
+//=============== ALGORITHME GLOUTON II ==========================
+
+int     comptage(int *boite)
+{
+        int nombre;
+        
+        nombre = 0;
+        while (boite[nombre])
+                nombre++;
+        return (nombre);
+}
+
+int     compatible(graphe g, int j, int *boite)
+{
+        int i;
+        
+        i = 0;
+        while (boite[i])
+        {
+                if (g.adj_matrix[boite[i] - 1][j] == 1)
+                        return (0);
+                i++;
+        }
+        return (1);
+}
+
+void        printboites(int ***boites, int i, graphe g)
+{
+        int j;
+        int k;
+        
+        j = -1;
+        while (++j < g.order)
+        {
+                k = -1;
+                while (++k  < g.order)
+                {
+                        printnbr(boites[i][j][k]);
+                }
+                printstr("\n");
+        }
+}
+
+int     meilleure(int ***boites, graphe g)
+{
+        int i;
+        int temp;
+        int j;
+        
+        i = -1;
+        temp = g.order;
+        while (++i < g.order)
+        {
+                j = 0;
+                while (boites[i][j][0] != 0)
+                        j++;
+                if (temp > j)
+                        temp = j;
+        }
+        i = -1;
+        while (++i < g.order)
+        {
+            j = 0;
+            while (boites[i][j][0] != 0)
+                    j++;
+            if (j == temp)
+                    return (i);
+        }
+        return (0);
+}
+
+int     *glouton2(graphe g)
+{
+        int *coloration;
+        int i;
+        int j;
+        int k;
+        int nombre_boites;
+        int place;
+        int nombre_bacterie;
+        int ***boites;
+        
+        //initialise les boites
+        i = -1;
+        boites = (int***)malloc(sizeof(int**) * g.order);
+        while (++i < g.order)
+        {
+                j = -1;
+                boites[i] = (int**)malloc(sizeof(int*) * g.order);
+                while (++j < g.order)
+                {
+                        k = -1;
+                        boites[i][j] = (int*)malloc(sizeof(int) * g.order);
+                        while (++k < g.order)
+                        {
+                                boites[i][j][k] = 0;
+                        }
+                }
+        }
+        //boucle principale
+        i = -1;
+        while (++i < g.order)
+        {
+                nombre_boites = 0;
+                boites[i][nombre_boites][0] = i + 1;
+                j = i + 1;
+                if (j == g.order)
+                        j = 0;
+                while (j != i && j != g.order)
+                {
+                        k = -1;
+                        place = 0;
+                        while (k++ < nombre_boites && place == 0)
+                        {
+                                nombre_bacterie = comptage(boites[i][k]);
+                                if (compatible(g, j, boites[i][k]))
+                                {
+                                        boites[i][k][nombre_bacterie] = j + 1;
+                                        place = 1;
+                                }
+                        }
+                        if (place == 0)
+                        {
+                                nombre_boites++;
+                                boites[i][k][0] = j + 1;
+                        }
+                        if (i == 0 && j + 1 == g.order)
+                                break;
+                        if (j + 1 == g.order)
+                                j = -1;
+                        j++;
+                }
+        }
+        //analyse du tableau 3D "boites"
+        nombre_boites = meilleure(boites, g);
+        //coloration de la meilleure solution
+        coloration = (int*)malloc(sizeof(int) * g.order);
+        i = -1;
+        while (++i < g.order)
+                coloration[i] = 0;
+        i = -1;
+        while (++i < g.order)
+        {
+                j = -1;
+                while (++j < g.order)
+                {
+                        if (boites[nombre_boites][i][j] !=0)
+                                coloration[boites[nombre_boites][i][j] - 1] = i +1;
+                }
+        }
+        return (coloration);
+}
+
 //=============== ALGORITHME DSATUR ==========================
 
 int dsat[ORDER_MAX];
@@ -410,7 +563,7 @@ int coloration_trouvee[ORDER_MAX];
 void	init_dsat(graphe g){
 	int i,j;
 	for ( i=0; i<g.order; i++ ){
-		dsat[i] = 1; //on commence à 1 pour ne pas avoir de dsat nul si noeud non adjacent à un autre noeud
+		dsat[i] = 1; //on commence �  1 pour ne pas avoir de dsat nul si noeud non adjacent �  un autre noeud
 		coloration_trouvee[i] = 0;
 		for ( j=0; j<g.order; j++ ){
 			if ( g.adj_matrix[i][j] ) dsat[i]++;
