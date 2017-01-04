@@ -3,7 +3,7 @@
 ##Utilisation des algorithmes de coloration de graphes
 Taper dans un terminal :
 
-`make`
+`make`  
 `./petriboxes ENTREE ALGORITHME`
 
 avec ENTREE, le nom d'un fichier formaté comme suit :
