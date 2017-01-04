@@ -1,30 +1,26 @@
-## NPhard
+#NPhard
 
-#Utilisation des algorithmes de coloration de graphes
+##Utilisation des algorithmes de coloration de graphes
 Taper dans un terminal :
 
-* *make*
-* *./petriboxes [ENTREE] [ALGORITHME]*
+* 'make'
+* './petriboxes ENTREE ALGORITHME'
 
 avec ENTREE, le nom d'un fichier formaté comme suit :
 
 Bacteria Species :A,B,C,D,E.
-
 Incompatibility List :
-
 A, B
-
 A, C
-
 C, D.
 
 
-avec [ALGORITHME] qui peut être, au choix, remplacé par :
-glouton
-glouton2
-cliquemax
-rlf
-dsatur
+avec ALGORITHME qui peut être, au choix, remplacé par :
+* glouton
+* glouton2
+* cliquemax
+* rlf
+* dsatur
 
 L'algorithme expliquera dans la console ses étapes majeures et un
 fichier appelé "sortie" se trouvera dans le dossier où a été
