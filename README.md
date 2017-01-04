@@ -32,3 +32,9 @@ que les groupements de bactéries qu'il est possible de cultiver ensemble.
 **contacts :**  
 ambre.thomas@insa-lyon.fr  
 louis.becquey@insa-lyon.fr
+
+**autres sources**
+- remerciements à Philippe Rolland pour son squelette d'algorithme glouton (notre Glouton 1) et de Dsatur:
+http://prolland.free.fr/Cours/Cycle2/Maitrise/GraphsTheory/TP/PrgGraphDsat/dsat_simple_c.txt
+
+
