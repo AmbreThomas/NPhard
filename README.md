@@ -27,7 +27,7 @@ L'algorithme expliquera dans la console ses étapes majeures et un
 fichier appelé "sortie" se trouvera dans le dossier où a été
 executé l'algorithme. Ce fichier contiendra le nombre de boites de
 Petri qu'il faut pour cultiver les bactéries données en entrée ainsi
-que les groupements de bactéries qu'il est possible de cultiver ensemble
+que les groupements de bactéries qu'il est possible de cultiver ensemble.
 
 **contacts :**  
 ambre.thomas@insa-lyon.fr  
