@@ -1,3 +1,12 @@
+/* ****************************************************************** */
+/*          COLORATION DE GRAPHES                                     */
+/*                                                                    */
+/*   Louis Becquey                                                    */
+/*   Ambre Thomas                                                     */
+/*                                 Bioinformatique et modelisation    */
+/*                                           INSA Lyon                */
+/* ****************************************************************** */
+
 #include "graphe.h"
 
 char	*ft_strnew(size_t size){

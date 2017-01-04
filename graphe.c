@@ -1,3 +1,12 @@
+/* ****************************************************************** */
+/*          COLORATION DE GRAPHES                                     */
+/*                                                                    */
+/*   Louis Becquey                                                    */
+/*   Ambre Thomas                                                     */
+/*                                 Bioinformatique et modelisation    */
+/*                                           INSA Lyon                */
+/* ****************************************************************** */
+
 #include "graphe.h"
 
 //================================ UTILITAIRES ===========================
@@ -681,6 +690,15 @@ int     *glouton2(graphe g)
                                 coloration[boites[nombre_boites][i][j] - 1] = i +1;
                 }
         }
+        i = -1;
+        while (++i < g.order)
+        {
+            j = -1;
+            while (++j < g.order)
+                    free(boites[i][j]);
+            free(boites[i]);
+        }
+        free(boites);
         return (coloration);
 }
 

@@ -1,3 +1,15 @@
+/* ****************************************************************** */
+/*          COLORATION DE GRAPHES                                     */
+/*                                                                    */
+/*   Louis Becquey                                                    */
+/*   Ambre Thomas                                                     */
+/*                                 Bioinformatique et modelisation    */
+/*                                           INSA Lyon                */
+/* ****************************************************************** */
+
+#ifndef __GRAPHE.H__
+#define __GRAPHE.H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -35,3 +47,6 @@ int     *glouton2(graphe g);
 int     comptage(int *boite);
 int     compatible(graphe g, int j, int *boite);
 int*	zykov(graphe g);
+
+
+#endif __GRAPHE.H__

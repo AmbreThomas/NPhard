@@ -1,3 +1,12 @@
+/* ****************************************************************** */
+/*          COLORATION DE GRAPHES                                     */
+/*                                                                    */
+/*   Louis Becquey                                                    */
+/*   Ambre Thomas                                                     */
+/*                                 Bioinformatique et modelisation    */
+/*                                           INSA Lyon                */
+/* ****************************************************************** */
+
 #include "graphe.h"
 
 int		int_max(int *tab, unsigned int taille){
