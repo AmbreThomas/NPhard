@@ -20,12 +20,12 @@ int		verif_color(graphe g, int* coloration_trouvee){
 	return (1);
 }
 
-void	display_graph(graphe g){
+void	display_graph(graphe g, int n){
 	int i,j;
 	printstr("\ngraph:\n");
-	for ( i=0; i<g.order; i++){
+	for ( i=0; i<n; i++){
 		printstr("\n");
-		for ( j=0; j<g.order; j++ ){
+		for ( j=0; j<n; j++ ){
 			printstr(" ");
 			printnbr(g.adj_matrix[i][j]);
 		}
@@ -33,10 +33,10 @@ void	display_graph(graphe g){
 	printstr("\n\n");
 }
 
-void	display_vecteur(int* vecteur, graphe g){
+void	display_vecteur(int* vecteur, int n){
 	int i;
-	printstr("\n\ncouleurs (sommet: couleur):\n");
-	for ( i=0; i<g.order; i++ ){
+	printstr("\ncouleurs (sommet: couleur):\n");
+	for ( i=0; i<n; i++ ){
 		printstr(" ");
 		printnbr(i);
 		printstr(": ");
@@ -84,7 +84,138 @@ graphe	graph_from_file(graphe g, const char *input_file){
 
 //================= ALGORITHME ZYKOV ==============================
 
+int		deg_max(int* degree, int n){
+	int i, max;
 
+	max = 0;
+	for ( i=0; i<n; i++ )
+		if (degree[i] > degree[max]) max = i;
+	return (max);
+}
+
+int		is_voisin_universel(graphe g, int n, int s){
+	int i;
+
+	for ( i=0; i<n; i++ )
+		if (i!=s && g.adj_matrix[s][i]==0) return (0);
+	return (1);
+}
+
+int		voisins_en_commun(graphe g, int n, int s, int t){
+	int i;
+	int k = 0;
+
+	for ( i=0; i<n; i++ )
+		if (g.adj_matrix[s][i]==1 && g.adj_matrix[t][i]==1) k++;
+	return (k);
+}
+
+int		max_voisins_non_voisin(graphe g, int n, int s){
+	int i;
+	int index_max = n+1; //non trouvé
+	int max = 0;
+	
+	for ( i=0; i<n; i++ ){
+		if (s!=i && g.adj_matrix[s][i]==0){ //noeud non voisin de s
+			if (index_max > n )
+				index_max = i; // récupérer même si pas de voisins en commun
+			if (voisins_en_commun(g,n,s,i) > max){
+				max = voisins_en_commun(g,n,s,i);
+				index_max = i;
+			}
+		}
+	}
+	if (index_max < n) return (index_max);
+	printstr("ce noeud est voisin de tous les autres !\n");
+	return (index_max);
+}
+
+void	remove_from_g(int node, graphe g, int n, int* node_index){
+	int	i,j;
+
+	printstr("  ( ");
+	printnbr(node_index[node]);
+	printstr(" est supprime du graphe )\n");
+	//remove from node_index
+	for ( i=node+1; i<n; i++ )
+		node_index[i-1] = node_index[i];
+	//remove node (ligne)
+	for ( i=node+1; i<n; i++ )
+		for ( j=0; j<n; j++ )
+			g.adj_matrix[i-1][j] = g.adj_matrix[i][j];
+	//remove node (colonne)
+	for ( i=node+1; i<n; i++ )
+		for ( j=0; j<n; j++ )
+			g.adj_matrix[j][i-1] = g.adj_matrix[j][i];
+}
+
+int		contract(int from_node, int to_node, graphe g, int n, int* node_index){
+	int i;
+
+	printstr("On contracte ");
+	printnbr(node_index[from_node]);
+	printstr(" en ");
+	printnbr(node_index[to_node]);
+	printstr("... ");
+	//contract en ligne
+	for ( i=0; i<n; i++ )
+		if (g.adj_matrix[from_node][i]==0 && g.adj_matrix[to_node][i]==1)
+			g.adj_matrix[from_node][i] = 1;
+	//contract en colonne
+	for ( i=0; i<n; i++ )
+		if (g.adj_matrix[i][from_node]==0 && g.adj_matrix[i][to_node]==1)
+			g.adj_matrix[i][from_node] = 1;
+	remove_from_g(from_node, g, n, node_index);
+	if (to_node > from_node) to_node--;
+	return to_node;
+}
+
+int*	zykov(graphe g){
+	int		degree[g.order];
+	int*	coloration;
+	int		node_index[g.order];
+	int 	couleurs = 0;
+	int		i,j,s,t;
+	int		n = g.order;
+
+	//init
+	if ((coloration = (int*)malloc(sizeof(int) * g.order)) == NULL)
+		return (0);
+	for ( i=0; i<g.order; i++ ){
+		coloration[i] = 0;
+		node_index[i] = i;
+	}
+
+	//go
+	while (n){
+		for ( i=0; i<n; i++ ){
+			degree[i] = 0;
+			for ( j=0; j<n; j++ )
+				if (g.adj_matrix[i][j]==1) degree[i]++;
+		}
+		s = deg_max(degree, n);
+		coloration[node_index[s]] = ++couleurs;
+		printstr("Coloration de ");
+		printnbr(node_index[s]);
+		printstr(" avec la couleur ");
+		printnbr(couleurs);
+		printstr("\n");
+		while (is_voisin_universel(g,n,s)==0){
+			t = max_voisins_non_voisin(g,n,s);
+			coloration[node_index[t]] = couleurs;
+			printstr("Coloration de ");
+			printnbr(node_index[t]);
+			printstr(" avec la couleur ");
+			printnbr(couleurs);
+			printstr("\n");
+			s=contract(t, s, g, n, node_index);
+			n--;
+		}
+		remove_from_g(s,g,n,node_index);
+		n--;
+	}
+	return (coloration);
+}
 
 //================= ALGORITHME MAX_CLIQUE ==========================
 
@@ -335,7 +466,6 @@ int*	bruteforce_search(graphe g){
 	return (coloration);
 }
 
-
 //================= ALGORITHME GLOUTON ==========================
 
 int*	copyYdansZ(int* destination, int* origine, graphe g){
@@ -495,4 +625,3 @@ int*	dsatur(graphe g){
 	}
 	return (coloration_trouvee);
 }
-
